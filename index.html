@@ -154,7 +154,7 @@
       border-bottom: 1px solid var(--xhs-border);
       flex-shrink: 0;
     }
-    .page-header h2 { font-size: 17px; font-weight: 600; flex: 1; }
+    .page-header h2 { font-size: 17px; font-weight: 600; flex: 1; text-align: center; }
     .back-btn {
       width: 32px; height: 32px;
       display: flex; align-items: center; justify-content: center;
@@ -1275,7 +1275,7 @@
                 </div>
                 <div class="review-text">配合烟酰胺精华一起用效果更好，控油保湿两不误。性价比很高！</div>
               </div>
-              <div class="review-more" id="expand-btn" onclick="toggleMoreReviews()">查看更多 5 条 &#9662;</div>
+              <div class="review-more" id="expand-btn" onclick="toggleMoreReviews()">查看更多 &#9662;</div>
               <div id="hidden-reviews" style="display:none">
                 <div class="review-card">
                   <div class="review-card-header">
@@ -1362,8 +1362,8 @@
           </div>
           <div class="action-bar">
             <div class="action-bar-hint">12 个同路人选了这款</div>
-            <button class="btn-secondary">查看商品</button>
-            <button class="btn-primary" onclick="addToCart()">加入购物车 &#165;189</button>
+            <button class="btn-secondary" onclick="showToast('跳转商品详情页')">查看商品</button>
+            <button class="btn-primary" onclick="addToCart()">立即购买 &#165;189</button>
           </div>
         </div>
 
@@ -1470,7 +1470,7 @@
           </div>
           <div class="action-bar">
             <div class="action-bar-hint">最多人选了 XX面霜</div>
-            <button class="btn-primary" onclick="addToCart()" style="flex:1">加入购物车 · XX面霜 &#165;189</button>
+            <button class="btn-primary" onclick="addToCart()" style="flex:1">立即购买 · XX面霜 &#165;189</button>
           </div>
         </div>
 
@@ -1579,7 +1579,7 @@
         <li>点击「看看其他成分研究员怎么说」进入详情</li>
         <li>展开「查看更多」，浏览相似用户反馈</li>
         <li>下滑查看对比入口，进入多品对比</li>
-        <li>点击「加入购物车」完成决策</li>
+        <li>点击「立即购买」完成下单</li>
       </ol>
       <div class="guide-footer">
         本原型模拟小红书 App 内的「种草后记」功能<br>
@@ -1704,22 +1704,22 @@
       animateCountUp(document.getElementById('p-stat-2'), 34, 400, 600);
       animateCountUp(document.getElementById('p-stat-3'), 12, 350, 650);
 
-      // 1.0s: bubbles surge in — short intervals for "rush" feel
+      // 0.9s: bubbles surge in — tight intervals, close together
       bubbleData.forEach(function(b, i) {
         var bubble = document.createElement('div');
         bubble.className = 'persona-bubble-item';
         bubble.innerHTML = '<div class="bubble-avatar" style="background:' + b.color + '"></div><span class="bubble-tag">' + b.tag + '</span>';
         track.appendChild(bubble);
-        setTimeout(function() { bubble.classList.add('visible'); }, 900 + i * 100);
+        setTimeout(function() { bubble.classList.add('visible'); }, 900 + i * 80);
       });
 
-      // 2.0s: fade out bubbles — ease-out (fast start, slow end)
+      // 1.9s: fade out bubbles — ease-out (fast start, slow end)
       setTimeout(function() {
-        track.style.transition = 'opacity 0.6s ease-out';
+        track.style.transition = 'opacity 0.5s ease-out';
         track.style.opacity = '0';
-      }, 2100);
+      }, 1900);
 
-      // 2.7s: after bubbles fully gone, show settled row
+      // 2.3s: settled row appears quickly after bubbles gone
       setTimeout(function() {
         bubbleData.forEach(function(b) {
           var av = document.createElement('div');
@@ -1731,9 +1731,9 @@
         more.className = 'settled-more visible';
         more.textContent = '+235 人和你一样在关注';
         settled.appendChild(more);
-        settled.style.transition = 'opacity 0.4s ease';
+        settled.style.transition = 'opacity 0.35s ease';
         settled.style.opacity = '1';
-      }, 2700);
+      }, 2300);
 
       // 2.0s: CTA button appears
       setTimeout(function() { cta.classList.add('visible'); }, 2000);
@@ -1761,7 +1761,7 @@
       var name = el.querySelector('.compare-product-name').textContent;
       var price = el.querySelector('.compare-product-price').textContent;
       var btn = document.querySelector('#screen-compare .btn-primary');
-      btn.textContent = '加入购物车 · ' + name + ' ' + price;
+      btn.textContent = '立即购买 · ' + name + ' ' + price;
       highlightStep(5);
     }
 

@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>种草后记 - 产品原型</title>
+  <style>
+    /* ===== RESET & GLOBAL ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      font-size: 14px;
+      color: #333;
+      background: #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* ===== CSS VARIABLES ===== */
+    :root {
+      --xhs-red: #ff2442;
+      --xhs-red-light: #fff0f0;
+      --xhs-bg: #f5f5f5;
+      --xhs-card-bg: #fff;
+      --xhs-text-primary: #333;
+      --xhs-text-secondary: #999;
+      --xhs-text-tertiary: #ccc;
+      --xhs-border: #f0f0f0;
+      --xhs-green: #00c853;
+      --xhs-orange: #ff9800;
+      --card-radius: 8px;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 12px;
+      --spacing-lg: 16px;
+      --spacing-xl: 20px;
+    }
+
+    /* ===== PAGE LAYOUT ===== */
+    .prototype-layout {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+
+    /* ===== GUIDE PANEL ===== */
+    .guide-panel {
+      width: 280px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      flex-shrink: 0;
+    }
+    .guide-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--xhs-red);
+      margin-bottom: 16px;
+    }
+    .guide-steps {
+      list-style: none;
+      counter-reset: step;
+    }
+    .guide-steps li {
+      counter-increment: step;
+      padding: 6px 0;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.5;
+      transition: color 0.2s;
+    }
+    .guide-steps li::before {
+      content: counter(step) '. ';
+      font-weight: 600;
+      color: var(--xhs-text-primary);
+    }
+    .guide-steps li.active {
+      color: var(--xhs-red);
+      font-weight: 600;
+    }
+    .guide-steps li.active::before {
+      color: var(--xhs-red);
+    }
+    .guide-footer {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--xhs-border);
+      font-size: 11px;
+      color: var(--xhs-text-tertiary);
+      line-height: 1.5;
+    }
+
+    /* ===== PHONE FRAME ===== */
+    .phone-frame {
+      width: 390px;
+      height: 844px;
+      background: #fff;
+      border-radius: 40px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 0 0 8px #1a1a1a;
+    }
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+    .status-bar {
+      height: 54px;
+      background: #fff;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 28px 8px;
+      font-size: 14px;
+      font-weight: 600;
+      position: relative;
+      z-index: 10;
+    }
+    .status-bar-notch {
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 126px; height: 34px;
+      background: #1a1a1a;
+      border-radius: 0 0 20px 20px;
+    }
+
+    /* ===== SCREEN SYSTEM ===== */
+    .screen {
+      display: none;
+      width: 100%;
+      height: calc(100% - 54px);
+      position: absolute;
+      top: 54px; left: 0;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--xhs-bg);
+    }
+    .screen.active { display: flex; }
+
+    /* ===== COMMON COMPONENTS ===== */
+    .page-header {
+      padding: 12px var(--spacing-xl);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #fff;
+      border-bottom: 1px solid var(--xhs-border);
+      flex-shrink: 0;
+    }
+    .page-header h2 { font-size: 17px; font-weight: 600; flex: 1; }
+    .back-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 20px; color: #333;
+      border: none; background: none;
+    }
+
+    /* ===== BOTTOM TAB BAR ===== */
+    .tab-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 83px;
+      background: #fff;
+      border-top: 0.5px solid var(--xhs-border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-around;
+      padding-top: 8px;
+      z-index: 100;
+    }
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 10px;
+      color: var(--xhs-text-secondary);
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+    .tab-item.active { color: var(--xhs-text-primary); font-weight: 600; }
+    .tab-icon { font-size: 22px; }
+    .tab-create {
+      width: 44px; height: 28px;
+      background: var(--xhs-red);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 300;
+      margin-top: -2px;
+    }
+
+    /* ===== PAGE: feed ===== */
+    .feed-top-nav {
+      background: #fff;
+      padding: 0 var(--spacing-lg);
+      flex-shrink: 0;
+    }
+    .feed-nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      padding: 10px 0 0;
+    }
+    .feed-nav-tab {
+      font-size: 16px;
+      color: var(--xhs-text-secondary);
+      cursor: pointer;
+      padding-bottom: 8px;
+      border: none;
+      background: none;
+      font-family: inherit;
+    }
+    .feed-nav-tab.active {
+      color: var(--xhs-text-primary);
+      font-weight: 700;
+      font-size: 17px;
+      border-bottom: 3px solid var(--xhs-red);
+    }
+    .feed-category-tabs {
+      display: flex;
+      gap: 16px;
+      padding: 8px 0 10px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .feed-category-tabs::-webkit-scrollbar { display: none; }
+    .feed-cat-tab {
+      font-size: 13px;
+      color: var(--xhs-text-secondary);
+      white-space: nowrap;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+    }
+    .feed-cat-tab.active { color: var(--xhs-text-primary); font-weight: 600; }
+
+    /* Waterfall Grid */
+    .feed-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--spacing-xs);
+      padding-bottom: 90px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .feed-body::-webkit-scrollbar { display: none; }
+    .waterfall {
+      column-count: 2;
+      column-gap: 6px;
+    }
+    .note-card {
+      break-inside: avoid;
+      margin-bottom: 6px;
+      background: var(--xhs-card-bg);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .note-card:active { transform: scale(0.98); }
+    .note-card-img {
+      width: 100%;
+      display: block;
+      background: #eee;
+      min-height: 120px;
+    }
+    .note-card-body { padding: 8px 10px 10px; }
+    .note-card-title {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.4;
+      color: var(--xhs-text-primary);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .note-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .note-card-author {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--xhs-text-secondary);
+      flex: 1;
+      min-width: 0;
+    }
+    .note-card-avatar {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #ddd;
+      flex-shrink: 0;
+    }
+    .note-card-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .note-card-likes {
+      font-size: 11px;
+      color: var(--xhs-text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ===== 种草后记卡片 ===== */
+    .zhongcao-card {
+      background: var(--xhs-card-bg);
+      border: 1.5px solid var(--xhs-red-light);
+      position: relative;
+    }
+    .zhongcao-card:active { transform: scale(0.97); }
+    .zhongcao-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, #fff5f5, #ffe8ec);
+      color: var(--xhs-red);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 0 0 var(--card-radius) 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+    .zhongcao-body { padding: 12px; }
+    .zhongcao-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--xhs-text-primary);
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+    .zhongcao-stats {
+      font-size: 12px;
+      color: var(--xhs-text-secondary);
+      margin-bottom: 8px;
+    }
+    .zhongcao-stats strong { color: var(--xhs-red); font-weight: 600; }
+    .zhongcao-quote {
+      font-size: 12px;
+      color: #666;
+      background: #fafafa;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border-left: 3px solid var(--xhs-red-light);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+    .zhongcao-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 13px;
+      color: var(--xhs-red);
+      font-weight: 500;
+      padding: 8px 0 4px;
+      cursor: pointer;
+    }
+    .zhongcao-product-preview {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .zhongcao-product-mini {
+      flex: 1;
+      text-align: center;
+      padding: 6px 4px;
+      background: #fafafa;
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--xhs-text-secondary);
+    }
+    .zhongcao-product-mini.top { border: 1px solid var(--xhs-red-light); }
+    .zhongcao-product-mini .mini-icon { font-size: 20px; margin-bottom: 2px; }
+    .zhongcao-product-mini .mini-pct { color: var(--xhs-red); font-weight: 600; font-size: 12px; }
+
+    /* ===== PAGE: single detail ===== */
+    .detail-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 80px;
+    }
+    .detail-scroll::-webkit-scrollbar { display: none; }
+    .detail-note-recap {
+      display: flex;
+      gap: 12px;
+      padding: 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--xhs-border);
+    }
+    .detail-note-thumb {
+      width: 60px; height: 60px;
+      border-radius: 8px;
+      background: linear-gradient(135deg,#fce4ec,#f8bbd0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .detail-note-info { flex: 1; min-width: 0; }
+    .detail-note-info h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .detail-note-meta { font-size: 12px; color: var(--xhs-text-secondary); display: flex; align-items: center; gap: 6px; }
+
+    .detail-section {
+      background: #fff;
+      margin-top: 8px;
+      padding: 16px;
+    }
+    .detail-section-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Community Stats Bar */
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+      padding: 16px;
+      background: #fff;
+      margin-top: 8px;
+    }
+    .stats-item { flex: 1; }
+    .stats-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--xhs-red);
+    }
+    .stats-label {
+      font-size: 11px;
+      color: var(--xhs-text-secondary);
+      margin-top: 2px;
+    }
+
+    /* Review Cards */
+    .review-group-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--xhs-text-primary);
+      margin-bottom: 8px;
+      padding: 4px 8px;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+    .review-card {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--xhs-border);
+    }
+    .review-card:last-child { border-bottom: none; }
+    .review-card-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .review-avatar {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: #eee;
+    }
+    .review-name { font-size: 12px; font-weight: 500; }
+    .review-tag {
+      font-size: 10px;
+      color: var(--xhs-red);
+      background: var(--xhs-red-light);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+    .review-tag-behavior {
+      font-size: 10px;
+      color: #3B82F6;
+      background: #EFF6FF;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* ===== PULSE DOT ===== */
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    .live-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--xhs-green);
+      animation: pulse 2s ease-in-out infinite;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .review-text { font-size: 13px; line-height: 1.6; color: #444; }
+    .review-more {
+      text-align: center;
+      padding: 10px;
+      font-size: 13px;
+      color: var(--xhs-text-secondary);
+      cursor: pointer;
+    }
+
+    /* Creator Update */
+    .creator-update {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: #fffbf0;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .creator-update-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #f48fb1;
+    }
+    .creator-update-text { flex: 1; font-size: 13px; line-height: 1.4; }
+    .creator-update-arrow { color: var(--xhs-text-tertiary); }
+
+    /* Bottom Action Bar */
+    .action-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 70px;
+      background: #fff;
+      border-top: 1px solid var(--xhs-border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+    }
+    .action-bar-hint {
+      flex: 1;
+      font-size: 11px;
+      color: var(--xhs-text-secondary);
+    }
+    .btn-secondary {
+      padding: 10px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--xhs-border);
+      background: #fff;
+      font-size: 13px;
+      color: var(--xhs-text-primary);
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-secondary:active { background: #f5f5f5; }
+    .btn-primary {
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: none;
+      background: var(--xhs-red);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-primary:active { opacity: 0.8; }
+
+    /* ===== BUBBLE ZONE ===== */
+    .bubble-zone {
+      background: #fff;
+      padding: 0 16px 16px;
+      overflow: hidden;
+      position: relative;
+      min-height: 56px;
+    }
+    .bubble-track {
+      position: relative;
+      height: 48px;
+      overflow: hidden;
+    }
+    .bubble-item {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px 4px 4px;
+      background: #fff;
+      border: 1px solid var(--xhs-border);
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      opacity: 0;
+      transform: translateY(20px) scale(0.8);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      white-space: nowrap;
+    }
+    .bubble-item.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .bubble-item.settled {
+      transform: translateY(0) scale(0.85);
+      opacity: 0.9;
+    }
+    .bubble-avatar {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .bubble-tag {
+      font-size: 10px;
+      color: var(--xhs-text-primary);
+      font-weight: 500;
+    }
+    .bubble-settled {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding-top: 4px;
+    }
+    .settled-avatar {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      margin-left: -6px;
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .settled-avatar:first-child { margin-left: 0; }
+    .settled-avatar.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .settled-more {
+      font-size: 11px;
+      color: var(--xhs-text-secondary);
+      margin-left: 8px;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .settled-more.visible { opacity: 1; }
+
+    /* ===== PAGE: compare ===== */
+    .compare-header-banner {
+      background: linear-gradient(135deg, #fff5f5, #ffe8ec);
+      padding: 16px;
+      text-align: center;
+    }
+    .compare-header-banner h3 { font-size: 16px; font-weight: 700; color: var(--xhs-text-primary); }
+    .compare-header-banner p { font-size: 12px; color: var(--xhs-text-secondary); margin-top: 4px; }
+
+    .compare-products {
+      display: flex;
+      gap: 8px;
+      padding: 16px 12px;
+      background: #fff;
+    }
+    .compare-product {
+      flex: 1;
+      text-align: center;
+      padding: 12px 6px;
+      border-radius: 10px;
+      border: 1.5px solid var(--xhs-border);
+      position: relative;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .compare-product.selected { border-color: var(--xhs-red); background: var(--xhs-red-light); }
+    .compare-product-icon { font-size: 32px; margin-bottom: 6px; }
+    .compare-product-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+    .compare-product-price { font-size: 12px; color: var(--xhs-red); font-weight: 600; }
+    .compare-product-pct { font-size: 11px; color: var(--xhs-text-secondary); margin-top: 4px; }
+    .compare-crown {
+      position: absolute;
+      top: -8px;
+      right: -4px;
+      font-size: 16px;
+    }
+
+    /* Distribution Bar */
+    .dist-bar-container { padding: 12px 16px; background: #fff; margin-top: 8px; }
+    .dist-bar-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+    .dist-bar {
+      display: flex;
+      height: 28px;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .dist-segment { display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; font-weight: 600; }
+    .dist-legend {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: var(--xhs-text-secondary);
+    }
+    .dist-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    /* Dimension Compare Table */
+    .dim-table { width: 100%; border-collapse: collapse; }
+    .dim-table th {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 4px;
+      text-align: center;
+      color: var(--xhs-text-secondary);
+      border-bottom: 1px solid var(--xhs-border);
+    }
+    .dim-table th:first-child { text-align: left; }
+    .dim-table td {
+      font-size: 12px;
+      padding: 10px 4px;
+      text-align: center;
+      border-bottom: 1px solid var(--xhs-border);
+    }
+    .dim-table td:first-child { text-align: left; font-weight: 500; }
+    .dim-stars { color: var(--xhs-orange); letter-spacing: -1px; }
+    .dim-best { background: #fff8e1; }
+
+    /* ===== Bubble Animation Zone ===== */
+    .bubble-zone {
+      position: relative;
+      min-height: 60px;
+      padding: 8px 16px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .bubble-track {
+      position: relative;
+      height: 44px;
+      transition: height 0.4s ease, opacity 0.3s ease;
+    }
+    .bubble-track.collapsed {
+      height: 0;
+      opacity: 0;
+    }
+    .bubble-item {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transform: translateY(20px) scale(0.8);
+      transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+    }
+    .bubble-item.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .bubble-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .bubble-tag {
+      font-size: 11px;
+      color: #3B82F6;
+      background: #EFF6FF;
+      padding: 3px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    .bubble-settled {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 24px;
+      padding-top: 4px;
+    }
+    .settled-avatar {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      margin-left: -6px;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .settled-avatar:first-child { margin-left: 0; }
+    .settled-avatar.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .settled-more {
+      font-size: 11px;
+      color: var(--xhs-text-secondary);
+      margin-left: 6px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .settled-more.visible { opacity: 1; }
+
+    /* ===== Behavior Tag (blue, distinct from red skin-type tag) ===== */
+    .review-tag-behavior {
+      font-size: 10px;
+      color: #3B82F6;
+      background: #EFF6FF;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* ===== Persona Popup Overlay ===== */
+    .overlay-mask {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 500;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      will-change: opacity;
+    }
+    .overlay-mask.show { display: block; }
+    .overlay-mask.visible { opacity: 1; }
+
+    .persona-popup {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -48%) scale(0.85);
+      width: 310px;
+      z-index: 501;
+      opacity: 0;
+      transition: opacity 0.35s ease-out, transform 0.45s cubic-bezier(0.22,1.2,0.36,1);
+      display: none;
+      text-align: center;
+      will-change: transform, opacity;
+    }
+    .persona-popup.show { display: block; }
+    .persona-popup.visible {
+      opacity: 1;
+      transform: translate(-50%, -48%) scale(1);
+    }
+
+    /* Character that breaks out of the card */
+    .persona-character {
+      position: relative;
+      z-index: 2;
+      margin-bottom: -40px;
+    }
+    .persona-character svg {
+      width: 120px;
+      height: 140px;
+      filter: drop-shadow(0 4px 12px rgba(139,92,246,0.3));
+    }
+
+    /* Floating sparkle decorations */
+    .persona-sparkle {
+      position: absolute;
+      z-index: 3;
+      animation: sparkleFloat 2s ease-in-out infinite;
+    }
+    .persona-sparkle:nth-child(1) { top: 20px; left: 30px; animation-delay: 0s; }
+    .persona-sparkle:nth-child(2) { top: 10px; right: 40px; animation-delay: 0.5s; }
+    .persona-sparkle:nth-child(3) { top: 60px; right: 20px; animation-delay: 1s; }
+    .persona-sparkle:nth-child(4) { top: 50px; left: 15px; animation-delay: 0.3s; }
+    @keyframes sparkleFloat {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
+      50% { transform: translateY(-6px) scale(1.2); opacity: 1; }
+    }
+
+    /* Main card body */
+    .persona-card {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      border-radius: 24px;
+      overflow: visible;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+    }
+
+    /* Upper region: identity card with own background */
+    .persona-identity {
+      position: relative;
+      z-index: 2;
+      background: linear-gradient(180deg, #f3e8ff 0%, #ede9fe 60%, #fff 100%);
+      border-radius: 24px 24px 16px 16px;
+      padding: 48px 24px 14px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(139,92,246,0.08);
+    }
+    .persona-label {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--xhs-text-primary);
+      margin-bottom: 8px;
+    }
+    .persona-label em {
+      font-style: normal;
+      color: #7C3AED;
+    }
+    .persona-tags {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .persona-tag-pill {
+      font-size: 11px;
+      color: #7C3AED;
+      background: rgba(255,255,255,0.7);
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-weight: 500;
+      border: 1px solid rgba(139,92,246,0.15);
+    }
+    .persona-sub {
+      font-size: 11px;
+      color: var(--xhs-text-secondary);
+    }
+
+    /* Lower region: data + action */
+    .persona-data {
+      padding: 14px 24px 20px;
+      text-align: center;
+    }
+    .persona-stats {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      will-change: opacity;
+    }
+    .persona-stats.visible { opacity: 1; }
+    .persona-stat-item {
+      text-align: center;
+      padding: 6px 10px;
+      background: #fafafa;
+      border-radius: 10px;
+    }
+    .persona-stat-num {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+    .persona-stat-label {
+      font-size: 10px;
+      color: var(--xhs-text-secondary);
+      margin-top: 1px;
+    }
+
+    .persona-bubble-zone {
+      min-height: 32px;
+      margin-bottom: 4px;
+      position: relative;
+    }
+    .persona-bubble-track {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      transition: opacity 0.4s ease;
+    }
+    .persona-bubble-track.collapsed { opacity: 0; pointer-events: none; }
+    .persona-bubble-item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      opacity: 0;
+      transform: translateY(24px) scale(0.7);
+      transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+      will-change: transform, opacity;
+    }
+    .persona-bubble-item.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      transition: opacity 0.25s cubic-bezier(0.16,1,0.3,1), transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .persona-bubble-settled {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      min-height: 20px;
+    }
+
+    .persona-cta {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 12px 28px;
+      background: linear-gradient(135deg, var(--xhs-red), #ff6b81);
+      color: #fff;
+      border: none;
+      border-radius: 22px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 8px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      box-shadow: 0 4px 16px rgba(255,36,66,0.3);
+    }
+    .persona-cta.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .persona-cta:active { transform: scale(0.96); }
+
+    /* Close button */
+    .persona-close {
+      position: absolute;
+      bottom: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.5);
+      color: #fff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      transition: background 0.2s;
+    }
+    .persona-close:hover { background: rgba(255,255,255,0.35); }
+
+    /* ===== Live Dot (Feed card) ===== */
+    .live-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--xhs-green);
+      border-radius: 50%;
+      margin-left: 4px;
+      vertical-align: middle;
+      animation: livePulse 2s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="prototype-layout">
+    <!-- ===== PHONE ===== -->
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span>8:29</span>
+          <div class="status-bar-notch"></div>
+          <span style="font-size:12px">&#9889;</span>
+        </div>
+
+        <!-- ========== P1: Feed 首页 ========== -->
+        <div class="screen active" id="screen-feed">
+          <div class="feed-top-nav">
+            <div class="feed-nav-tabs">
+              <button class="feed-nav-tab">关注</button>
+              <button class="feed-nav-tab active">发现</button>
+              <button class="feed-nav-tab">上海</button>
+            </div>
+            <div class="feed-category-tabs">
+              <button class="feed-cat-tab active">推荐</button>
+              <button class="feed-cat-tab">视频</button>
+              <button class="feed-cat-tab">直播</button>
+              <button class="feed-cat-tab">穿搭</button>
+              <button class="feed-cat-tab">护肤</button>
+              <button class="feed-cat-tab">美食</button>
+              <button class="feed-cat-tab">家居</button>
+            </div>
+          </div>
+          <div class="feed-body">
+            <div class="waterfall">
+
+              <!-- 普通笔记 1 -->
+              <div class="note-card">
+                <div class="note-card-img" style="height:200px;background:linear-gradient(135deg,#fce4ec,#f8bbd0);display:flex;align-items:center;justify-content:center;font-size:40px">&#129524;</div>
+                <div class="note-card-body">
+                  <div class="note-card-title">混油皮夏天面霜测评｜5款平价面霜实测</div>
+                  <div class="note-card-footer">
+                    <div class="note-card-author">
+                      <div class="note-card-avatar" style="background:#f48fb1"></div>
+                      <span class="note-card-name">美妆小达人</span>
+                    </div>
+                    <div class="note-card-likes">&#9825; 1.2k</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 普通笔记 2 -->
+              <div class="note-card">
+                <div class="note-card-img" style="height:160px;background:linear-gradient(135deg,#e3f2fd,#bbdefb);display:flex;align-items:center;justify-content:center;font-size:40px">&#9992;&#65039;</div>
+                <div class="note-card-body">
+                  <div class="note-card-title">上海周末好去处｜这家咖啡店绝了</div>
+                  <div class="note-card-footer">
+                    <div class="note-card-author">
+                      <div class="note-card-avatar" style="background:#90caf9"></div>
+                      <span class="note-card-name">城市漫游指南</span>
+                    </div>
+                    <div class="note-card-likes">&#9825; 856</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 🌱 种草后记 — 单品 -->
+              <div class="note-card zhongcao-card" onclick="showPersonaPopup()">
+                <div class="zhongcao-badge">&#127793; 种草后记</div>
+                <div class="note-card-img" style="height:100px;background:linear-gradient(135deg,#fff8e6,#fff0d0);display:flex;align-items:center;justify-content:center;position:relative"><img src="data:image/png;base64,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" style="height:76px;mix-blend-mode:multiply;clip-path:inset(4px 0 0 0);margin-top:12px" /></div>
+                <div class="zhongcao-body">
+                  <div class="zhongcao-title">根据你的收藏，我们发现了一些有趣的事...</div>
+                  <div class="zhongcao-stats"><strong>239</strong><span class="live-dot"></span> 人和你关注了同一件事</div>
+                  <div class="zhongcao-cta">看看你的种草画像 &#8594;</div>
+                </div>
+              </div>
+
+              <!-- 普通笔记 3 -->
+              <div class="note-card">
+                <div class="note-card-img" style="height:220px;background:linear-gradient(135deg,#fff3e0,#ffe0b2);display:flex;align-items:center;justify-content:center;font-size:40px">&#127836;</div>
+                <div class="note-card-body">
+                  <div class="note-card-title">上海！我真心推荐的12家外卖！(附店名)</div>
+                  <div class="note-card-footer">
+                    <div class="note-card-author">
+                      <div class="note-card-avatar" style="background:#ffcc80"></div>
+                      <span class="note-card-name">是含含不是呵呵</span>
+                    </div>
+                    <div class="note-card-likes">&#9825; 379</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 普通笔记 4 -->
+              <div class="note-card">
+                <div class="note-card-img" style="height:180px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);display:flex;align-items:center;justify-content:center;font-size:40px">&#128087;</div>
+                <div class="note-card-body">
+                  <div class="note-card-title">初夏穿搭灵感｜清爽又好看</div>
+                  <div class="note-card-footer">
+                    <div class="note-card-author">
+                      <div class="note-card-avatar" style="background:#a5d6a7"></div>
+                      <span class="note-card-name">穿搭日记</span>
+                    </div>
+                    <div class="note-card-likes">&#9825; 2.4k</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 普通笔记 5 -->
+              <div class="note-card">
+                <div class="note-card-img" style="height:170px;background:linear-gradient(135deg,#f3e5f5,#e1bee7);display:flex;align-items:center;justify-content:center;font-size:40px">&#127968;</div>
+                <div class="note-card-body">
+                  <div class="note-card-title">小户型改造｜10平米卧室变身ins风</div>
+                  <div class="note-card-footer">
+                    <div class="note-card-author">
+                      <div class="note-card-avatar" style="background:#ce93d8"></div>
+                      <span class="note-card-name">家居灵感集</span>
+                    </div>
+                    <div class="note-card-likes">&#9825; 567</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 普通笔记（冷启动不在 feed 展示） -->
+              <div class="note-card">
+                <div class="note-card-img" style="height:150px;background:linear-gradient(135deg,#e0f7fa,#b2ebf2);display:flex;align-items:center;justify-content:center;font-size:40px">&#127861;</div>
+                <div class="note-card-body">
+                  <div class="note-card-title">一个人的下午茶｜自制抹茶拿铁教程</div>
+                  <div class="note-card-footer">
+                    <div class="note-card-author">
+                      <div class="note-card-avatar" style="background:#80cbc4"></div>
+                      <span class="note-card-name">慢生活日记</span>
+                    </div>
+                    <div class="note-card-likes">&#9825; 1.8k</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 普通笔记 6 -->
+              <div class="note-card">
+                <div class="note-card-img" style="height:190px;background:linear-gradient(135deg,#fce4ec,#f8bbd0);display:flex;align-items:center;justify-content:center;font-size:40px">&#128132;</div>
+                <div class="note-card-body">
+                  <div class="note-card-title">这个底妆公式绝了！自然又持久</div>
+                  <div class="note-card-footer">
+                    <div class="note-card-author">
+                      <div class="note-card-avatar" style="background:#ef9a9a"></div>
+                      <span class="note-card-name">化妆师小鱼</span>
+                    </div>
+                    <div class="note-card-likes">&#9825; 3.1k</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== P2: 单品详情页 ========== -->
+        <div class="screen" id="screen-single">
+          <div class="page-header">
+            <button class="back-btn" onclick="goBack()">&#8592;</button>
+            <h2>种草后记</h2>
+          </div>
+          <div class="detail-scroll">
+            <!-- 区域 1: 商品卡片（顶部） -->
+            <div style="padding:16px;background:#fff;border-bottom:1px solid var(--xhs-border)">
+              <div style="display:flex;gap:12px;align-items:center;padding:12px;background:#fafafa;border-radius:10px;border:1px solid var(--xhs-border)">
+                <div style="width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#fff0f0,#ffe0e6);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">&#129524;</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px;font-weight:600;margin-bottom:2px">珂润润浸保湿面霜</div>
+                  <div style="font-size:12px;color:var(--xhs-text-secondary)">40g · 控油保湿 · 混油皮适用</div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+                    <span style="font-size:15px;font-weight:700;color:var(--xhs-red)">&#165;189</span>
+                    <span style="font-size:11px;color:var(--xhs-text-tertiary);text-decoration:line-through">&#165;228</span>
+                    <span style="font-size:10px;color:#fff;background:var(--xhs-red);padding:1px 6px;border-radius:4px">8.3折</span>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--xhs-text-secondary);margin-top:8px;text-align:center">来自笔记「混油皮夏日面霜测评」· 社区反馈最集中的一款</div>
+            </div>
+
+            <div class="detail-section">
+              <div class="detail-section-title">&#128172; 和你一样的「成分研究员」怎么说</div>
+              <div class="review-group-label">来自相关笔记评论 · 和你偏好相似（8 人）</div>
+              <div class="review-card">
+                <div class="review-card-header">
+                  <div class="review-avatar" style="background:#f48fb1"></div>
+                  <span class="review-name">小虾米</span>
+                  <span class="review-tag">混油皮</span>
+                  <span class="review-tag-behavior">成分研究员</span>
+                </div>
+                <div class="review-text">用了一周不闷痘，控油效果比较明显。T区出油减少了，两颊也不会拔干。质地是啫喱状的，很清爽。</div>
+              </div>
+              <div class="review-card">
+                <div class="review-card-header">
+                  <div class="review-avatar" style="background:#ce93d8"></div>
+                  <span class="review-name">护肤小白</span>
+                  <span class="review-tag">混油皮</span>
+                  <span class="review-tag-behavior">闭眼回购党</span>
+                </div>
+                <div class="review-text">质地是啫喱状，上脸很清爽不厚重。我在广东用了一个月，夏天完全OK。</div>
+              </div>
+              <div class="review-card">
+                <div class="review-card-header">
+                  <div class="review-avatar" style="background:#90caf9"></div>
+                  <span class="review-name">是薯薯呀</span>
+                  <span class="review-tag">混油皮</span>
+                  <span class="review-tag-behavior">口碑跟随者</span>
+                </div>
+                <div class="review-text">配合烟酰胺精华一起用效果更好，控油保湿两不误。性价比很高！</div>
+              </div>
+              <div class="review-more" id="expand-btn" onclick="toggleMoreReviews()">查看更多 5 条 &#9662;</div>
+              <div id="hidden-reviews" style="display:none">
+                <div class="review-card">
+                  <div class="review-card-header">
+                    <div class="review-avatar" style="background:#a5d6a7"></div>
+                    <span class="review-name">混油星人</span>
+                    <span class="review-tag">混油皮</span>
+                    <span class="review-tag-behavior">闪电决策家</span>
+                  </div>
+                  <div class="review-text">确实清爽！但冬天可能保湿力不太够，适合春夏用。</div>
+                </div>
+                <div class="review-card">
+                  <div class="review-card-header">
+                    <div class="review-avatar" style="background:#fff59d"></div>
+                    <span class="review-name">猫猫爱护肤</span>
+                    <span class="review-tag">混油皮</span>
+                    <span class="review-tag-behavior">闭眼回购党</span>
+                  </div>
+                  <div class="review-text">回购第二瓶了，混油皮夏天yyds。</div>
+                </div>
+                <div class="review-more" id="collapse-btn" onclick="toggleMoreReviews()" style="display:none">收起 &#9652;</div>
+              </div>
+              <div class="review-group-label" style="margin-top:12px">其他用户反馈（4 人）</div>
+              <div class="review-card">
+                <div class="review-card-header">
+                  <div class="review-avatar" style="background:#ffcc80"></div>
+                  <span class="review-name">敏敏子</span>
+                  <span class="review-tag">干敏皮</span>
+                  <span class="review-tag-behavior">成分研究员</span>
+                </div>
+                <div class="review-text">保湿力对我来说不太够，可能更适合油皮。不过没有刺激感，敏感肌也能用。</div>
+              </div>
+            </div>
+            <!-- 区域 4: 种草来源 -->
+            <div class="detail-section">
+              <div class="detail-section-title">&#128196; 种草来源</div>
+              <div class="detail-note-recap" style="border:1px solid var(--xhs-border);border-radius:10px;padding:12px;cursor:pointer">
+                <div class="detail-note-thumb">&#129524;</div>
+                <div class="detail-note-info">
+                  <h3>混油皮夏日面霜测评｜5款平价面霜实测</h3>
+                  <div class="detail-note-meta">
+                    <div style="width:18px;height:18px;border-radius:50%;background:#f48fb1"></div>
+                    <span>美妆小达人</span>
+                    <span>· 你 3 天前种草</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 区域 5: 博主后续 -->
+            <div class="detail-section">
+              <div class="detail-section-title">&#128221; 博主后续</div>
+              <div class="creator-update">
+                <div class="creator-update-avatar"></div>
+                <div class="creator-update-text">
+                  <strong>美妆小达人</strong> 发布了 30 天使用报告<br>
+                  <span style="font-size:12px;color:var(--xhs-text-secondary)">"一个月了，回来汇报！控油效果依然在线…"</span>
+                </div>
+                <span class="creator-update-arrow">&#8594;</span>
+              </div>
+            </div>
+
+            <!-- 区域 6: 对比入口 -->
+            <div class="detail-section" onclick="showScreen('compare')" style="cursor:pointer">
+              <div class="detail-section-title">&#128202; 你还种草了 2 款，对比一下？</div>
+              <div class="zhongcao-product-preview">
+                <div class="zhongcao-product-mini top">
+                  <div class="mini-icon">&#127942;</div>
+                  <div>XX面霜</div>
+                  <div class="mini-pct">62%</div>
+                </div>
+                <div class="zhongcao-product-mini">
+                  <div class="mini-icon">&#10024;</div>
+                  <div>YY精华</div>
+                  <div class="mini-pct">25%</div>
+                </div>
+                <div class="zhongcao-product-mini">
+                  <div class="mini-icon">&#128167;</div>
+                  <div>ZZ水乳</div>
+                  <div class="mini-pct">13%</div>
+                </div>
+              </div>
+              <div style="text-align:center;padding-top:8px;font-size:13px;color:var(--xhs-red);font-weight:500">看看同路人怎么选 &#8594;</div>
+            </div>
+          </div>
+          <div class="action-bar">
+            <div class="action-bar-hint">12 个同路人选了这款</div>
+            <button class="btn-secondary">查看商品</button>
+            <button class="btn-primary" onclick="addToCart()">加入购物车 &#165;189</button>
+          </div>
+        </div>
+
+        <!-- ========== P3: 多品对比页 ========== -->
+        <div class="screen" id="screen-compare">
+          <div class="page-header">
+            <button class="back-btn" onclick="showScreen('single')">&#8592;</button>
+            <h2>种草后记 · 对比</h2>
+          </div>
+          <div class="detail-scroll">
+            <div class="compare-header-banner">
+              <h3>你种草了 3 款面霜</h3>
+              <p>47 个同路人也在纠结，这是他们的选择</p>
+            </div>
+            <div class="compare-products">
+              <div class="compare-product selected" onclick="selectProduct(this)">
+                <div class="compare-crown">&#128081;</div>
+                <div class="compare-product-icon">&#129524;</div>
+                <div class="compare-product-name">XX面霜</div>
+                <div class="compare-product-price">&#165;189</div>
+                <div class="compare-product-pct">62% 选择</div>
+              </div>
+              <div class="compare-product" onclick="selectProduct(this)">
+                <div class="compare-product-icon">&#10024;</div>
+                <div class="compare-product-name">YY精华</div>
+                <div class="compare-product-price">&#165;259</div>
+                <div class="compare-product-pct">25% 选择</div>
+              </div>
+              <div class="compare-product" onclick="selectProduct(this)">
+                <div class="compare-product-icon">&#128167;</div>
+                <div class="compare-product-name">ZZ水乳</div>
+                <div class="compare-product-price">&#165;139</div>
+                <div class="compare-product-pct">13% 选择</div>
+              </div>
+            </div>
+            <div class="dist-bar-container">
+              <div class="dist-bar-title">47 个同路人的选择</div>
+              <div class="dist-bar">
+                <div class="dist-segment" style="width:62%;background:var(--xhs-red)">62%</div>
+                <div class="dist-segment" style="width:25%;background:#ff9800">25%</div>
+                <div class="dist-segment" style="width:13%;background:#9e9e9e">13%</div>
+              </div>
+              <div class="dist-legend">
+                <span><span class="dist-dot" style="background:var(--xhs-red)"></span>XX面霜</span>
+                <span><span class="dist-dot" style="background:#ff9800"></span>YY精华</span>
+                <span><span class="dist-dot" style="background:#9e9e9e"></span>ZZ水乳</span>
+              </div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-section-title">&#128172; 选了 XX面霜 的混油皮用户</div>
+              <div class="review-card">
+                <div class="review-card-header">
+                  <div class="review-avatar" style="background:#f48fb1"></div>
+                  <span class="review-name">油皮救星</span>
+                  <span class="review-tag">混油皮</span>
+                  <span class="review-tag">选了XX</span>
+                </div>
+                <div class="review-text">纠结了一周最后选了XX，主要看中控油。用下来确实T区不怎么油了，质地清爽不黏腻。</div>
+              </div>
+              <div class="review-card">
+                <div class="review-card-header">
+                  <div class="review-avatar" style="background:#90caf9"></div>
+                  <span class="review-name">小王同学</span>
+                  <span class="review-tag">混油皮</span>
+                  <span class="review-tag">选了XX</span>
+                </div>
+                <div class="review-text">本来想选ZZ水乳因为便宜，但看到同路人都选XX就跟了，没后悔！控油保湿都不错。</div>
+              </div>
+            </div>
+            <div class="detail-section">
+              <div class="detail-section-title">&#128202; 社区评价对比 <span style="font-size:10px;color:var(--xhs-text-tertiary);font-weight:400;margin-left:4px">AI 分析生成</span></div>
+              <table class="dim-table">
+                <thead>
+                  <tr><th>维度</th><th>XX面霜</th><th>YY精华</th><th>ZZ水乳</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>控油</td>
+                    <td class="dim-best"><span class="dim-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
+                    <td><span class="dim-stars">&#9733;&#9733;&#9733;&#9734;&#9734;</span></td>
+                    <td><span class="dim-stars">&#9733;&#9733;&#9733;&#9733;&#9734;</span></td>
+                  </tr>
+                  <tr>
+                    <td>保湿</td>
+                    <td><span class="dim-stars">&#9733;&#9733;&#9733;&#9733;&#9734;</span></td>
+                    <td class="dim-best"><span class="dim-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
+                    <td><span class="dim-stars">&#9733;&#9733;&#9733;&#9734;&#9734;</span></td>
+                  </tr>
+                  <tr>
+                    <td>不闷痘</td>
+                    <td><span class="dim-stars">&#9733;&#9733;&#9733;&#9733;&#9734;</span></td>
+                    <td><span class="dim-stars">&#9733;&#9733;&#9733;&#9734;&#9734;</span></td>
+                    <td class="dim-best"><span class="dim-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
+                  </tr>
+                  <tr>
+                    <td>性价比</td>
+                    <td><span class="dim-stars">&#9733;&#9733;&#9733;&#9733;&#9734;</span></td>
+                    <td><span class="dim-stars">&#9733;&#9733;&#9734;&#9734;&#9734;</span></td>
+                    <td class="dim-best"><span class="dim-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="action-bar">
+            <div class="action-bar-hint">最多人选了 XX面霜</div>
+            <button class="btn-primary" onclick="addToCart()" style="flex:1">加入购物车 · XX面霜 &#165;189</button>
+          </div>
+        </div>
+
+        <!-- Bottom Tab Bar -->
+        <div class="tab-bar">
+          <button class="tab-item active"><span class="tab-icon">&#127968;</span><span>首页</span></button>
+          <button class="tab-item"><span class="tab-icon">&#128722;</span><span>市集</span></button>
+          <button class="tab-item"><div class="tab-create">+</div></button>
+          <button class="tab-item"><span class="tab-icon">&#128172;</span><span>消息</span></button>
+          <button class="tab-item"><span class="tab-icon">&#128100;</span><span>我</span></button>
+        </div>
+
+        <!-- ========== Persona Popup Overlay ========== -->
+        <div class="overlay-mask" id="overlay-mask" onclick="closePersonaPopup()"></div>
+        <div class="persona-popup" id="persona-popup">
+          <!-- Floating sparkles -->
+          <div class="persona-sparkle" style="font-size:16px;color:#a78bfa">&#10024;</div>
+          <div class="persona-sparkle" style="font-size:12px;color:#f9a8d4">&#10022;</div>
+          <div class="persona-sparkle" style="font-size:14px;color:#93c5fd">&#10024;</div>
+          <div class="persona-sparkle" style="font-size:10px;color:#c4b5fd">&#9733;</div>
+
+          <!-- Character breaking out of card -->
+          <div class="persona-character">
+            <svg viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Hair -->
+              <path d="M42 45 L55 20 L70 28 L80 18 L85 35 L88 30 L90 48 L78 50 L42 50 Z" fill="#8B5CF6" opacity="0.85"/>
+              <path d="M40 48 L48 25 L58 30 L42 52 Z" fill="#7C3AED" opacity="0.7"/>
+              <!-- Face -->
+              <polygon points="50,48 82,48 85,72 78,82 54,82 47,72" fill="#E8C9A0"/>
+              <polygon points="50,48 66,48 63,72 54,82 47,72" fill="#DBBF94"/>
+              <!-- Glasses -->
+              <rect x="52" y="56" width="12" height="10" rx="2" fill="none" stroke="#4B5563" stroke-width="2"/>
+              <rect x="68" y="56" width="12" height="10" rx="2" fill="none" stroke="#4B5563" stroke-width="2"/>
+              <line x1="64" y1="61" x2="68" y2="61" stroke="#4B5563" stroke-width="1.5"/>
+              <!-- Eyes -->
+              <circle cx="58" cy="62" r="2" fill="#333"/>
+              <circle cx="74" cy="62" r="2" fill="#333"/>
+              <!-- Mouth -->
+              <path d="M62 72 Q66 76 70 72" stroke="#c97a6d" stroke-width="1.5" fill="none"/>
+              <!-- Lab coat body -->
+              <polygon points="46,82 86,82 92,130 40,130" fill="#f8f8ff"/>
+              <polygon points="46,82 66,82 60,130 40,130" fill="#eee"/>
+              <!-- Coat lapels -->
+              <polygon points="56,82 66,82 64,100 58,100" fill="#7C3AED" opacity="0.3"/>
+              <polygon points="66,82 76,82 74,100 68,100" fill="#7C3AED" opacity="0.2"/>
+              <!-- Arm + Flask -->
+              <polygon points="86,82 96,90 102,80 92,72" fill="#E8C9A0"/>
+              <path d="M96 68 L100 58 L108 58 L112 68 L108 80 L100 80 Z" fill="#E0E7FF" stroke="#7C3AED" stroke-width="1.5" opacity="0.8"/>
+              <ellipse cx="104" cy="74" rx="5" ry="4" fill="#C4B5FD" opacity="0.6"/>
+              <!-- Bubbles from flask -->
+              <circle cx="102" cy="52" r="3" fill="#C4B5FD" opacity="0.5"/>
+              <circle cx="108" cy="46" r="2" fill="#A78BFA" opacity="0.4"/>
+              <circle cx="105" cy="40" r="1.5" fill="#8B5CF6" opacity="0.3"/>
+            </svg>
+          </div>
+
+          <!-- Card body -->
+          <div class="persona-card">
+            <div class="persona-identity">
+              <div class="persona-label">你是「<em>成分研究员</em>」</div>
+              <div class="persona-tags">
+                <span class="persona-tag-pill">爱看成分表</span>
+                <span class="persona-tag-pill">理性决策</span>
+                <span class="persona-tag-pill">功效导向</span>
+              </div>
+              <div class="persona-sub">基于你最近收藏的 12 篇笔记</div>
+            </div>
+            <div class="persona-data">
+              <div class="persona-stats" id="persona-stats">
+                <div class="persona-stat-item">
+                  <div class="persona-stat-num" id="p-stat-1">0</div>
+                  <div class="persona-stat-label">同时种草</div>
+                </div>
+                <div class="persona-stat-item">
+                  <div class="persona-stat-num" id="p-stat-2">0</div>
+                  <div class="persona-stat-label">正在纠结</div>
+                </div>
+                <div class="persona-stat-item">
+                  <div class="persona-stat-num" id="p-stat-3">0</div>
+                  <div class="persona-stat-label">买了并分享</div>
+                </div>
+              </div>
+              <div class="persona-bubble-zone">
+                <div class="persona-bubble-track" id="p-bubble-track"></div>
+                <div class="persona-bubble-settled" id="p-bubble-settled"></div>
+              </div>
+              <button class="persona-cta" id="persona-cta" onclick="closePersonaPopup(); showScreen('single')">
+                看看其他成分研究员怎么说 &#8594;
+              </button>
+            </div>
+          </div>
+
+          <!-- Close X button below card -->
+          <div class="persona-close" onclick="closePersonaPopup()">&#10005;</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== GUIDE PANEL ===== -->
+    <div class="guide-panel">
+      <div class="guide-title">原型</div>
+      <ol class="guide-steps" id="guide-steps">
+        <li class="active">在 Feed 中找到「种草后记」卡片（带 &#127793; 标记）</li>
+        <li>点击卡片，查看你的种草画像</li>
+        <li>点击「看看其他成分研究员怎么说」进入详情</li>
+        <li>展开「查看更多」，浏览相似用户反馈</li>
+        <li>下滑查看对比入口，进入多品对比</li>
+        <li>点击「加入购物车」完成决策</li>
+      </ol>
+      <div class="guide-footer">
+        本原型模拟小红书 App 内的「种草后记」功能<br>
+        — 收藏后的社区动态追踪，让决策不再孤独
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== PAGE NAVIGATION ===== */
+    var stepMap = { feed: 0, single: 2, compare: 4 };
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+      document.getElementById('screen-' + id).classList.add('active');
+      document.querySelector('.tab-bar').style.display = id === 'feed' ? 'flex' : 'none';
+      highlightStep(stepMap[id] || 0);
+      // 进入单品页时触发实时感动画
+      if (id === 'single') {
+        setTimeout(runSinglePageAnimation, 200);
+      }
+    }
+
+    function goBack() { showScreen('feed'); }
+
+    function highlightStep(idx) {
+      var steps = document.querySelectorAll('#guide-steps li');
+      steps.forEach(function(li, i) {
+        li.classList.toggle('active', i === idx);
+      });
+    }
+
+    /* ===== INTERACTIONS ===== */
+    function toggleMoreReviews() {
+      var el = document.getElementById('hidden-reviews');
+      var expandBtn = document.getElementById('expand-btn');
+      var collapseBtn = document.getElementById('collapse-btn');
+      if (el.style.display === 'none') {
+        el.style.display = 'block';
+        expandBtn.style.display = 'none';
+        collapseBtn.style.display = 'block';
+        highlightStep(3);
+      } else {
+        el.style.display = 'none';
+        expandBtn.style.display = 'block';
+        collapseBtn.style.display = 'none';
+      }
+    }
+
+    function addToCart() {
+      showToast('已加入购物车 \uD83D\uDED2');
+      highlightStep(5);
+    }
+
+    function showToast(msg) {
+      var phone = document.querySelector('.phone-screen');
+      var toast = document.createElement('div');
+      toast.textContent = msg;
+      toast.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;pointer-events:none;white-space:nowrap;';
+      phone.appendChild(toast);
+      setTimeout(function() { toast.remove(); }, 1500);
+    }
+
+    /* ===== ANIMATION UTILITIES ===== */
+    var bubbleData = [
+      { name: '小虾米', tag: '成分研究员', color: '#f48fb1' },
+      { name: '护肤小白', tag: '闭眼回购党', color: '#ce93d8' },
+      { name: '是薯薯呀', tag: '口碑跟随者', color: '#90caf9' },
+      { name: '油皮救星', tag: '闪电决策家', color: '#a5d6a7' }
+    ];
+
+    function animateCountUp(el, target, duration, delay) {
+      setTimeout(function() {
+        var startTime = null;
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.floor(eased * target);
+          if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }, delay);
+    }
+
+    /* ===== PERSONA POPUP ===== */
+    function showPersonaPopup() {
+      var mask = document.getElementById('overlay-mask');
+      var popup = document.getElementById('persona-popup');
+      var stats = document.getElementById('persona-stats');
+      var cta = document.getElementById('persona-cta');
+      var track = document.getElementById('p-bubble-track');
+      var settled = document.getElementById('p-bubble-settled');
+
+      // Reset
+      stats.classList.remove('visible');
+      cta.classList.remove('visible');
+      track.innerHTML = '';
+      track.classList.remove('collapsed');
+      track.style.opacity = '1';
+      settled.innerHTML = '';
+      settled.style.opacity = '0';
+      document.getElementById('p-stat-1').textContent = '0';
+      document.getElementById('p-stat-2').textContent = '0';
+      document.getElementById('p-stat-3').textContent = '0';
+
+      // Show overlay
+      mask.classList.add('show');
+      popup.classList.add('show');
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          mask.classList.add('visible');
+          popup.classList.add('visible');
+        });
+      });
+
+      highlightStep(1);
+
+      // 0.5s: stats fade in + numbers count up
+      setTimeout(function() { stats.classList.add('visible'); }, 400);
+      animateCountUp(document.getElementById('p-stat-1'), 239, 500, 500);
+      animateCountUp(document.getElementById('p-stat-2'), 34, 400, 600);
+      animateCountUp(document.getElementById('p-stat-3'), 12, 350, 650);
+
+      // 1.0s: bubbles surge in — short intervals for "rush" feel
+      bubbleData.forEach(function(b, i) {
+        var bubble = document.createElement('div');
+        bubble.className = 'persona-bubble-item';
+        bubble.innerHTML = '<div class="bubble-avatar" style="background:' + b.color + '"></div><span class="bubble-tag">' + b.tag + '</span>';
+        track.appendChild(bubble);
+        setTimeout(function() { bubble.classList.add('visible'); }, 900 + i * 100);
+      });
+
+      // 2.0s: fade out bubbles — ease-out (fast start, slow end)
+      setTimeout(function() {
+        track.style.transition = 'opacity 0.6s ease-out';
+        track.style.opacity = '0';
+      }, 2100);
+
+      // 2.7s: after bubbles fully gone, show settled row
+      setTimeout(function() {
+        bubbleData.forEach(function(b) {
+          var av = document.createElement('div');
+          av.className = 'settled-avatar visible';
+          av.style.background = b.color;
+          settled.appendChild(av);
+        });
+        var more = document.createElement('span');
+        more.className = 'settled-more visible';
+        more.textContent = '+235 人和你一样在关注';
+        settled.appendChild(more);
+        settled.style.transition = 'opacity 0.4s ease';
+        settled.style.opacity = '1';
+      }, 2700);
+
+      // 2.0s: CTA button appears
+      setTimeout(function() { cta.classList.add('visible'); }, 2000);
+    }
+
+    function closePersonaPopup() {
+      var mask = document.getElementById('overlay-mask');
+      var popup = document.getElementById('persona-popup');
+      mask.classList.remove('visible');
+      popup.classList.remove('visible');
+      setTimeout(function() {
+        mask.classList.remove('show');
+        popup.classList.remove('show');
+      }, 350);
+    }
+
+    /* ===== SINGLE PAGE ANIMATION (simplified) ===== */
+    function runSinglePageAnimation() {
+      // no-op: stats removed, animation handled by popup
+    }
+
+    function selectProduct(el) {
+      document.querySelectorAll('.compare-product').forEach(function(p) { p.classList.remove('selected'); });
+      el.classList.add('selected');
+      var name = el.querySelector('.compare-product-name').textContent;
+      var price = el.querySelector('.compare-product-price').textContent;
+      var btn = document.querySelector('#screen-compare .btn-primary');
+      btn.textContent = '加入购物车 · ' + name + ' ' + price;
+      highlightStep(5);
+    }
+
+  </script>
+</body>
+</html>
